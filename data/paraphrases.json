@@ -1,0 +1,62 @@
+{
+    "paraphrase_groups": [
+        {
+            "id": "climate_change",
+            "topic": "Climate Change Impact",
+            "texts": [
+                "Climate change is causing global temperatures to rise, leading to more frequent and severe weather events.",
+                "Rising global temperatures due to climate change are resulting in increasingly common and intense weather phenomena.",
+                "The warming of our planet from climate change triggers more regular and devastating meteorological events.",
+                "Global warming is making extreme weather events happen more often and with greater intensity."
+            ]
+        },
+        {
+            "id": "exercise_benefits",
+            "topic": "Benefits of Exercise",
+            "texts": [
+                "Regular physical exercise improves cardiovascular health and reduces the risk of chronic diseases.",
+                "Engaging in consistent physical activity enhances heart health and lowers the likelihood of long-term illnesses.",
+                "Working out regularly strengthens your cardiovascular system and decreases your chances of developing chronic conditions.",
+                "Frequent exercise benefits heart function and helps prevent ongoing health problems."
+            ]
+        },
+        {
+            "id": "ai_progress",
+            "topic": "Artificial Intelligence Advancement",
+            "texts": [
+                "Artificial intelligence has made remarkable progress in natural language understanding and generation.",
+                "AI systems have achieved significant advances in comprehending and producing human language.",
+                "The field of artificial intelligence has seen extraordinary improvements in processing and creating natural language.",
+                "Machine learning models have dramatically improved at understanding and generating human text."
+            ]
+        },
+        {
+            "id": "coffee_preparation",
+            "topic": "Coffee Brewing",
+            "texts": [
+                "The perfect cup of coffee requires freshly ground beans and water heated to precisely 200 degrees Fahrenheit.",
+                "To brew an ideal coffee, use recently ground beans with water at exactly 200°F.",
+                "Making excellent coffee demands fresh-ground beans and water brought to 200 degrees.",
+                "A superior coffee is achieved by grinding beans fresh and using water heated to around 200°F."
+            ]
+        }
+    ],
+    "unrelated_texts": [
+        {
+            "id": "quantum_physics",
+            "text": "Quantum entanglement allows particles to be correlated in ways that classical physics cannot explain."
+        },
+        {
+            "id": "ancient_rome",
+            "text": "The Roman Empire at its peak controlled territory spanning from Britain to Mesopotamia."
+        },
+        {
+            "id": "cooking_pasta",
+            "text": "To cook pasta properly, bring a large pot of salted water to a rolling boil before adding the noodles."
+        },
+        {
+            "id": "space_exploration",
+            "text": "NASA's Artemis program aims to return humans to the Moon and eventually establish a permanent presence."
+        }
+    ]
+}

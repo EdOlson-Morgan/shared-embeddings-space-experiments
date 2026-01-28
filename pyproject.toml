@@ -1,0 +1,21 @@
+[project]
+name = "shared-embeddings-space-experiments"
+version = "0.1.0"
+description = "Experiments exploring shared embedding spaces with Voyage AI models"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.1",
+    "pandas>=3.0.0",
+    "python-dotenv>=1.2.1",
+    "seaborn>=0.13.2",
+    "voyageai>=0.3.7",
+]
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
