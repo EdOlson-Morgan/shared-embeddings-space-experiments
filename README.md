@@ -48,6 +48,19 @@ Uses advanced metrics like the **Vendi Score** and **Effective Rank** to quantit
 ### 03 - Cross-Model Embedding Comparison
 Analyzes the consistency across the Voyage 4 family within their shared embedding space. Compares how large, standard, lite, and nano models represent the same content and whether they agree on similarity rankings.
 
+## Related projects
+
+### uuid4-words
+Started here as an experiment (see
+[`docs/uuid-token-optimization-plan.md`](docs/uuid-token-optimization-plan.md)
+for the original design writeup and benchmark methodology) and has since
+moved to its own repo:
+[`EdOlson-Morgan/uuid4-words`](https://github.com/EdOlson-Morgan/uuid4-words)
+— a deterministic, reversible UUIDv4 <-> word-phrase encoder, published on
+PyPI as [`uuid4-words`](https://pypi.org/project/uuid4-words/), that costs
+~47% fewer LLM tokens than a raw UUID string. This repo has no runtime
+dependency on it.
+
 ## Voyage 4 Model Family
 
 These models share a common embedding space, allowing for direct comparison and interoperability:
