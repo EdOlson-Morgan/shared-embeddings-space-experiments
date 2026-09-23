@@ -125,9 +125,13 @@ ships as the default `encode_uuid4()` output.
 
 ## Module layout
 
-The implementation is a [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/)
-member, published standalone to PyPI as `uuid4-words`, with a thin
-re-export inside this repo for existing in-repo imports:
+**Superseded — see "PyPI extraction and OpenAI SDK integration" below.**
+This section documents the layout as of the intermediate step, when the
+implementation was a
+[uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/)
+member of this repo, published standalone to PyPI as `uuid4-words`, with a
+thin re-export inside this repo for existing in-repo imports. It has since
+moved out of this repo entirely; kept here for the historical record.
 
 ```
 packages/uuid4-words/            # standalone package -- source of truth, PyPI: uuid4-words
@@ -264,26 +268,31 @@ was re-run with real `tiktoken`:
 
 ## PyPI extraction and OpenAI SDK integration
 
-The implementation was extracted into `packages/uuid4-words/`, a standalone
-uv workspace member with zero runtime dependencies, and published to PyPI
-as [`uuid4-words`](https://pypi.org/project/uuid4-words/) under the MIT
-license (`packages/uuid4-words/LICENSE`). `src/embeddings_space/uuid_words/`
-now just re-exports it, so there is one source of truth for the codec and
-wordlist rather than two copies to keep in sync.
+The implementation was first extracted into `packages/uuid4-words/` as a
+standalone uv workspace member of this repo (zero runtime dependencies,
+MIT-licensed), then fully moved out into its own repo:
+[`EdOlson-Morgan/uuid4-words`](https://github.com/EdOlson-Morgan/uuid4-words),
+intended for publication to PyPI as
+[`uuid4-words`](https://pypi.org/project/uuid4-words/). This repo
+(`shared-embeddings-space-experiments`) no longer contains the
+implementation or depends on it — `packages/uuid4-words/` and
+`src/embeddings_space/uuid_words/` were both removed rather than re-linked,
+per the decision made when the standalone repo was created. This doc
+remains here as the historical design record; the canonical code, tests,
+README, and release tooling now live in the `uuid4-words` repo.
 
 Two OpenAI Python SDK integration recipes are documented and implemented in
-`uuid_words.integrations.openai` (also see
-`packages/uuid4-words/README.md` for the full write-up): a `WordsUUID`
-Pydantic field type for UUIDs that flow through structured outputs / tool
-calling, and a `with_uuid_words` decorator + `extract_uuid_words` for UUIDs
-embedded in freeform prompt/transcript text. The SDK itself has no
-middleware/plugin hook for this, so both are explicit, opt-in patterns
-rather than a global request/response rewriter — see that README's "Why not
-a global request/response rewriter?" section for why blind text-scanning
-was rejected.
+that repo's `uuid_words.integrations.openai` (see its README for the full
+write-up): a `WordsUUID` Pydantic field type for UUIDs that flow through
+structured outputs / tool calling, and a `with_uuid_words` decorator +
+`extract_uuid_words` for UUIDs embedded in freeform prompt/transcript text.
+The SDK itself has no middleware/plugin hook for this, so both are
+explicit, opt-in patterns rather than a global request/response rewriter —
+see that README's "Why not a global request/response rewriter?" section for
+why blind text-scanning was rejected.
 
-Release process (tagging, PyPI Trusted Publisher setup, the
-`publish-uuid4-words` GitHub Actions workflow) is documented in
-`packages/uuid4-words/PUBLISHING.md`. As of this writing the package has
-not yet actually been published — that requires a human to complete the
-one-time PyPI account/Trusted Publisher setup described there.
+Release process (tagging, PyPI Trusted Publisher setup, the tag-triggered
+`publish.yml` GitHub Actions workflow) is documented in that repo's
+`PUBLISHING.md`. As of this writing the package has not yet actually been
+published — that requires a human to complete the one-time PyPI
+account/Trusted Publisher setup described there.

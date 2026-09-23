@@ -26,14 +26,7 @@ Experiments exploring shared embedding spaces, focusing on Voyage AI's Voyage 4 
 ├── src/embeddings_space/     # Core modules
 │   ├── embeddings.py         # Voyage AI client wrapper
 │   ├── metrics.py            # Similarity metrics
-│   ├── diversity.py          # Population diversity metrics (Vendi Score, etc.)
-│   └── uuid_words/           # Re-exports packages/uuid4-words for in-repo use
-├── packages/uuid4-words/     # Standalone, PyPI-published package (source of truth)
-│   └── src/uuid_words/       # Token-efficient UUIDv4 <-> word encoding
-├── scripts/
-│   └── build_uuid_wordlist.py # Regenerates packages/uuid4-words/src/uuid_words/wordlist.py
-├── tests/
-│   └── test_uuid_words.py    # Run with `uv run pytest tests/`
+│   └── diversity.py          # Population diversity metrics (Vendi Score, etc.)
 ├── data/                     # Sample datasets
 │   ├── paraphrases.json      # Multi-topic paraphrase groups
 │   └── coffee_paraphrases.json # Homogeneous single-topic dataset
@@ -55,35 +48,18 @@ Uses advanced metrics like the **Vendi Score** and **Effective Rank** to quantit
 ### 03 - Cross-Model Embedding Comparison
 Analyzes the consistency across the Voyage 4 family within their shared embedding space. Compares how large, standard, lite, and nano models represent the same content and whether they agree on similarity rankings.
 
-## Utilities
+## Related projects
 
-### UUIDv4 Word Encoding
-Reversibly encodes a UUIDv4 as a short sequence of plain English words
-instead of raw hex, so it costs fewer LLM tokens in prompts/transcripts
-while staying human-readable. Published standalone as
-[`uuid4-words`](https://pypi.org/project/uuid4-words/) on PyPI
-(`pip install uuid4-words`) — see
-[`packages/uuid4-words/README.md`](packages/uuid4-words/README.md) for full
-usage, including two OpenAI Python SDK integration recipes (a typed
-Pydantic field for structured outputs/tool calling, and an explicit
-decorator for freeform prompt text). See
+### uuid4-words
+Started here as an experiment (see
 [`docs/uuid-token-optimization-plan.md`](docs/uuid-token-optimization-plan.md)
-for the design and measured results (the shipped wordlist is verified
-single-token under `tiktoken`'s `o200k_base` encoding; the space-joined
-form saves ~47% of tokens vs. a raw UUID string).
-
-This repo re-exports it as `embeddings_space.uuid_words` (via a uv
-workspace member) for existing in-repo code; new code should depend on
-`uuid_words` directly.
-
-```python
-from embeddings_space.uuid_words import encode_uuid4, decode_uuid4
-# or, equivalently, once `pip install uuid4-words`:
-# from uuid_words import encode_uuid4, decode_uuid4
-
-encode_uuid4("173c6f57-2c5f-41a3-b898-f49eae04ffcc")
-# "ability content shared prime queen think dude created fact frank bay wine"
-```
+for the original design writeup and benchmark methodology) and has since
+moved to its own repo:
+[`EdOlson-Morgan/uuid4-words`](https://github.com/EdOlson-Morgan/uuid4-words)
+— a deterministic, reversible UUIDv4 <-> word-phrase encoder, published on
+PyPI as [`uuid4-words`](https://pypi.org/project/uuid4-words/), that costs
+~47% fewer LLM tokens than a raw UUID string. This repo has no runtime
+dependency on it.
 
 ## Voyage 4 Model Family
 
