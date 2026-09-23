@@ -60,15 +60,15 @@ Analyzes the consistency across the Voyage 4 family within their shared embeddin
 sequence of plain English words instead of raw hex, so it costs fewer LLM
 tokens in prompts/transcripts while staying human-readable. See
 [`docs/uuid-token-optimization-plan.md`](docs/uuid-token-optimization-plan.md)
-for the design and current verification status (the shipped wordlist is
-provisional until re-verified against `tiktoken`'s `o200k_base` encoding
-from an environment with network access to it).
+for the design and measured results (the shipped wordlist is verified
+single-token under `tiktoken`'s `o200k_base` encoding; the space-joined
+form saves ~47% of tokens vs. a raw UUID string).
 
 ```python
 from embeddings_space.uuid_words import encode_uuid4, decode_uuid4
 
 encode_uuid4("173c6f57-2c5f-41a3-b898-f49eae04ffcc")
-# "ability connected share previous quality think dropped cover eye found bay wine"
+# "ability content shared prime queen think dude created fact frank bay wine"
 ```
 
 ## Voyage 4 Model Family

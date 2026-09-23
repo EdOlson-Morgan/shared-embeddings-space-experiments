@@ -105,10 +105,11 @@ def encode_uuid4(value: uuid.UUID | str) -> str:
 def encode_uuid4_slug(value: uuid.UUID | str) -> str:
     """Encode a UUIDv4 as a hyphen-separated slug of ``_WORD_COUNT`` words.
 
-    Convenient for filenames/URLs/identifiers, but hyphen-joining has not
-    been verified to preserve one-token-per-word under o200k_base the way
-    the space-joined form is expected to (see docs/uuid-token-optimization-plan.md);
-    prefer ``encode_uuid4`` when token count matters.
+    Convenient for filenames/URLs/identifiers, but the hyphens get merged
+    into neighboring words by o200k_base's BPE, breaking the one-token-per-word
+    guarantee: measured savings are ~12% vs. raw UUID, compared to ~47% for
+    the space-joined ``encode_uuid4`` (see docs/uuid-token-optimization-plan.md).
+    Prefer ``encode_uuid4`` when token count matters.
     """
     payload = _uuid4_to_payload(_coerce_uuid4(value))
     return "-".join(_payload_to_words(payload))

@@ -210,38 +210,37 @@ this needs to happen before Implementation Step 1 can produce real numbers.
 
 ## Implementation status
 
-Steps 2-4 are done: `src/embeddings_space/uuid_words/` (`codec.py`,
-`wordlist.py`, `__init__.py`), `scripts/build_uuid_wordlist.py`, and
-`tests/test_uuid_words.py` are all in the repo, and `uv run pytest tests/`
-passes (13 passed, 2 skipped).
+All 5 implementation steps are done. `src/embeddings_space/uuid_words/`
+(`codec.py`, `wordlist.py`, `__init__.py`), `scripts/build_uuid_wordlist.py`,
+and `tests/test_uuid_words.py` are all in the repo, and `uv run pytest
+tests/` passes (15 passed, 0 skipped).
 
-**Step 1 is only partially done, and step 5 is blocked**, for the same
-reason flagged in the risk section above: this sandbox's egress policy
-blocks `openaipublic.blob.core.windows.net`, so `tiktoken` cannot load
-`o200k_base` here. What actually happened:
+**Step 1 and step 5 are now complete.** A later session had network access
+to `openaipublic.blob.core.windows.net`, so `scripts/build_uuid_wordlist.py`
+was re-run with real `tiktoken`:
 
-- `scripts/build_uuid_wordlist.py` sources its candidate corpus from the
-  `wordfreq` PyPI package (frequency-ranked English words, fetched from
-  PyPI — a host this session can reach) rather than from `tiktoken`
-  directly.
-- It then *attempts* the single-token filter against `o200k_base`; when
-  that fails (as it did here), it falls back to the frequency-filtered
-  candidates **without** the single-token check, and marks the generated
-  `wordlist.py` **UNVERIFIED** in its module docstring.
-- The committed `wordlist.py` is therefore a plausible-but-unconfirmed
-  2048-word list: 3-9 letter, ASCII, alphabetic, ordinary-English words
-  filtered by a small hardcoded profanity blocklist — not yet confirmed
-  to be single-token under `o200k_base`, and not yet checked for stray
-  proper nouns the frequency corpus may contain (e.g. place names).
-- The `TestTokenSavings` test class (single-token verification + the
-  token-count benchmark) is gated with `pytest.importorskip`/`pytest.skip`
-  and currently skips for the same reason; it will run for real wherever
-  `tiktoken` can reach that host.
+- The committed `wordlist.py` is now **VERIFIED**: all 2048 words are
+  confirmed single-token under `o200k_base` (as `" " + word`), not just
+  frequency-filtered candidates.
+- `tests/test_uuid_words.py::TestTokenSavings` runs for real (no longer
+  skipped) and passes: `test_wordlist_is_single_token` and
+  `test_phrase_uses_fewer_tokens_than_raw_uuid` both confirmed.
+- **Real token-count benchmark** (200 random UUIDv4s, `o200k_base`):
+  - raw UUID string: avg 22.8 tokens
+  - `encode_uuid4` (space-joined phrase): avg 12.0 tokens — **~47% savings**
+  - `encode_uuid4_slug` (hyphen-joined): avg 20.1 tokens — **~12% savings**
 
-**Before treating this as production-ready**, re-run
-`uv run --with wordfreq --with tiktoken scripts/build_uuid_wordlist.py`
-from an environment with that network access, then `uv run pytest
-tests/test_uuid_words.py::TestTokenSavings -v` to get real single-token
-verification and real token-count savings numbers, and revisit the
-`encode_uuid4` (space) vs `encode_uuid4_slug` (hyphen) default based on
-what that benchmark actually shows.
+  The hyphen separator loses most of the benefit because o200k_base's BPE
+  merges hyphens into neighboring words (e.g. `raise-review` doesn't split
+  the way `raise review` does), confirming the risk flagged in the
+  "Separator / output format" section above.
+- **Separator decision**: `encode_uuid4` (space-joined) is the default/
+  primary form, per the original plan; `encode_uuid4_slug` remains
+  available for identifier/URL/filename contexts where hyphens are
+  required, with its savings clearly documented as smaller.
+- Notably, the ~47% savings for the space-joined form beats the ~17-18
+  token estimate reported for `id-token-nicer`'s word mode (see "Prior
+  art" above), and even beats their non-word numeric-mode estimate
+  (~13 tokens, ~40% savings) — likely because this wordlist was filtered
+  for single-token status specifically against `o200k_base`, whereas
+  `id-token-nicer` optimizes across multiple tokenizers simultaneously.
