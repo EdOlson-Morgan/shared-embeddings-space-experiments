@@ -207,3 +207,41 @@ this needs to happen before Implementation Step 1 can produce real numbers.
    integrity cases above.
 5. Run the token-count benchmark for real, decide the default separator,
    and record actual savings numbers (replacing the estimates in this doc).
+
+## Implementation status
+
+Steps 2-4 are done: `src/embeddings_space/uuid_words/` (`codec.py`,
+`wordlist.py`, `__init__.py`), `scripts/build_uuid_wordlist.py`, and
+`tests/test_uuid_words.py` are all in the repo, and `uv run pytest tests/`
+passes (13 passed, 2 skipped).
+
+**Step 1 is only partially done, and step 5 is blocked**, for the same
+reason flagged in the risk section above: this sandbox's egress policy
+blocks `openaipublic.blob.core.windows.net`, so `tiktoken` cannot load
+`o200k_base` here. What actually happened:
+
+- `scripts/build_uuid_wordlist.py` sources its candidate corpus from the
+  `wordfreq` PyPI package (frequency-ranked English words, fetched from
+  PyPI — a host this session can reach) rather than from `tiktoken`
+  directly.
+- It then *attempts* the single-token filter against `o200k_base`; when
+  that fails (as it did here), it falls back to the frequency-filtered
+  candidates **without** the single-token check, and marks the generated
+  `wordlist.py` **UNVERIFIED** in its module docstring.
+- The committed `wordlist.py` is therefore a plausible-but-unconfirmed
+  2048-word list: 3-9 letter, ASCII, alphabetic, ordinary-English words
+  filtered by a small hardcoded profanity blocklist — not yet confirmed
+  to be single-token under `o200k_base`, and not yet checked for stray
+  proper nouns the frequency corpus may contain (e.g. place names).
+- The `TestTokenSavings` test class (single-token verification + the
+  token-count benchmark) is gated with `pytest.importorskip`/`pytest.skip`
+  and currently skips for the same reason; it will run for real wherever
+  `tiktoken` can reach that host.
+
+**Before treating this as production-ready**, re-run
+`uv run --with wordfreq --with tiktoken scripts/build_uuid_wordlist.py`
+from an environment with that network access, then `uv run pytest
+tests/test_uuid_words.py::TestTokenSavings -v` to get real single-token
+verification and real token-count savings numbers, and revisit the
+`encode_uuid4` (space) vs `encode_uuid4_slug` (hyphen) default based on
+what that benchmark actually shows.

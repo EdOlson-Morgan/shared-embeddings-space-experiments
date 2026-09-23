@@ -26,7 +26,12 @@ Experiments exploring shared embedding spaces, focusing on Voyage AI's Voyage 4 
 ├── src/embeddings_space/     # Core modules
 │   ├── embeddings.py         # Voyage AI client wrapper
 │   ├── metrics.py            # Similarity metrics
-│   └── diversity.py          # Population diversity metrics (Vendi Score, etc.)
+│   ├── diversity.py          # Population diversity metrics (Vendi Score, etc.)
+│   └── uuid_words/           # Token-efficient UUIDv4 <-> word encoding
+├── scripts/
+│   └── build_uuid_wordlist.py # Regenerates uuid_words/wordlist.py
+├── tests/
+│   └── test_uuid_words.py    # Run with `uv run pytest tests/`
 ├── data/                     # Sample datasets
 │   ├── paraphrases.json      # Multi-topic paraphrase groups
 │   └── coffee_paraphrases.json # Homogeneous single-topic dataset
@@ -47,6 +52,24 @@ Uses advanced metrics like the **Vendi Score** and **Effective Rank** to quantit
 
 ### 03 - Cross-Model Embedding Comparison
 Analyzes the consistency across the Voyage 4 family within their shared embedding space. Compares how large, standard, lite, and nano models represent the same content and whether they agree on similarity rankings.
+
+## Utilities
+
+### UUIDv4 Word Encoding
+`src/embeddings_space/uuid_words/` reversibly encodes a UUIDv4 as a short
+sequence of plain English words instead of raw hex, so it costs fewer LLM
+tokens in prompts/transcripts while staying human-readable. See
+[`docs/uuid-token-optimization-plan.md`](docs/uuid-token-optimization-plan.md)
+for the design and current verification status (the shipped wordlist is
+provisional until re-verified against `tiktoken`'s `o200k_base` encoding
+from an environment with network access to it).
+
+```python
+from embeddings_space.uuid_words import encode_uuid4, decode_uuid4
+
+encode_uuid4("173c6f57-2c5f-41a3-b898-f49eae04ffcc")
+# "ability connected share previous quality think dropped cover eye found bay wine"
+```
 
 ## Voyage 4 Model Family
 
