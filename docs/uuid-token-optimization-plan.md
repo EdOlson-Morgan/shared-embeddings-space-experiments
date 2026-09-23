@@ -125,20 +125,37 @@ ships as the default `encode_uuid4()` output.
 
 ## Module layout
 
+The implementation is a [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/)
+member, published standalone to PyPI as `uuid4-words`, with a thin
+re-export inside this repo for existing in-repo imports:
+
 ```
-src/embeddings_space/uuid_words/
-    __init__.py      # public API: encode_uuid4, decode_uuid4
-    codec.py          # bit extraction + base-V <-> words, no tiktoken import
-    wordlist.py        # generated: WORDS: tuple[str, ...], committed to git
+packages/uuid4-words/            # standalone package -- source of truth, PyPI: uuid4-words
+    pyproject.toml
+    LICENSE                       # MIT
+    README.md                     # PyPI long description; OpenAI SDK integration docs
+    src/uuid_words/
+        __init__.py                # public API: encode_uuid4, decode_uuid4
+        codec.py                   # bit extraction + base-V <-> words, no tiktoken import
+        wordlist.py                # generated: WORDS: tuple[str, ...], committed to git
+        integrations/openai.py     # WordsUUID (pydantic type) + with_uuid_words decorator
+    tests/
+        test_codec.py               # round-trip, token-count benchmark, edge cases,
+        test_integrations_openai.py # wordlist integrity (tiktoken-gated, see risk below)
+
+src/embeddings_space/uuid_words/  # thin re-export of the above, for this repo's own code
+    __init__.py
+    codec.py
+    wordlist.py
 
 scripts/
     build_uuid_wordlist.py   # offline generator (corpus -> filtered -> wordlist.py)
+                              # writes to packages/uuid4-words/src/uuid_words/wordlist.py
                               # dev-only; requires tiktoken + network access
                               # to fetch the o200k_base merge file once
 
 tests/
-    test_uuid_words.py   # round-trip, token-count benchmark, edge cases,
-                          # wordlist integrity (tiktoken-gated, see risk below)
+    test_uuid_words.py   # in-repo integration test against the embeddings_space shim
 ```
 
 Public API sketch:
@@ -244,3 +261,29 @@ was re-run with real `tiktoken`:
   (~13 tokens, ~40% savings) — likely because this wordlist was filtered
   for single-token status specifically against `o200k_base`, whereas
   `id-token-nicer` optimizes across multiple tokenizers simultaneously.
+
+## PyPI extraction and OpenAI SDK integration
+
+The implementation was extracted into `packages/uuid4-words/`, a standalone
+uv workspace member with zero runtime dependencies, and published to PyPI
+as [`uuid4-words`](https://pypi.org/project/uuid4-words/) under the MIT
+license (`packages/uuid4-words/LICENSE`). `src/embeddings_space/uuid_words/`
+now just re-exports it, so there is one source of truth for the codec and
+wordlist rather than two copies to keep in sync.
+
+Two OpenAI Python SDK integration recipes are documented and implemented in
+`uuid_words.integrations.openai` (also see
+`packages/uuid4-words/README.md` for the full write-up): a `WordsUUID`
+Pydantic field type for UUIDs that flow through structured outputs / tool
+calling, and a `with_uuid_words` decorator + `extract_uuid_words` for UUIDs
+embedded in freeform prompt/transcript text. The SDK itself has no
+middleware/plugin hook for this, so both are explicit, opt-in patterns
+rather than a global request/response rewriter — see that README's "Why not
+a global request/response rewriter?" section for why blind text-scanning
+was rejected.
+
+Release process (tagging, PyPI Trusted Publisher setup, the
+`publish-uuid4-words` GitHub Actions workflow) is documented in
+`packages/uuid4-words/PUBLISHING.md`. As of this writing the package has
+not yet actually been published — that requires a human to complete the
+one-time PyPI account/Trusted Publisher setup described there.

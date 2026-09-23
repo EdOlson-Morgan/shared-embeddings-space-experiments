@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate src/embeddings_space/uuid_words/wordlist.py.
+"""Generate packages/uuid4-words/src/uuid_words/wordlist.py.
 
 Pulls a frequency-ranked English word corpus (via the `wordfreq` package),
 filters it down to plain, unambiguous, ASCII lowercase words, and then --
@@ -121,7 +121,7 @@ def main() -> None:
     chosen = sorted(pool[:VOCAB_SIZE])
     out_path = (
         Path(__file__).resolve().parent.parent
-        / "src/embeddings_space/uuid_words/wordlist.py"
+        / "packages/uuid4-words/src/uuid_words/wordlist.py"
     )
     _write_wordlist(chosen, verified, out_path)
 

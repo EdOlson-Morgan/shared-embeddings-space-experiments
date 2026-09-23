@@ -13,6 +13,7 @@ dependencies = [
     "scipy>=1.17.0",
     "seaborn>=0.13.2",
     "voyageai>=0.3.7",
+    "uuid4-words",
 ]
 
 [dependency-groups]
@@ -23,6 +24,12 @@ dev = [
 
 [tool.uv]
 package = true
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+uuid4-words = { workspace = true }
 
 [tool.setuptools.packages.find]
 where = ["src"]
